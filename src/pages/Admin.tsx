@@ -50,7 +50,7 @@ const Admin = () => {
     }
   };
 
-  const handleBookingAction = async (bookingId: string, action: 'approved' | 'declined') => {
+  const handleBookingAction = async (bookingId: string, action: 'approved' | 'rejected') => {
     try {
       const { error } = await supabase
         .from('bookings')
@@ -134,7 +134,7 @@ const Admin = () => {
                         Accept
                       </Button>
                       <Button 
-                        onClick={() => handleBookingAction(booking.id, 'declined')}
+                        onClick={() => handleBookingAction(booking.id, 'rejected')}
                         variant="destructive"
                         size="sm"
                       >
