@@ -3,6 +3,8 @@ import { BookingCalendar } from '@/components/BookingCalendar';
 import { BookingForm } from '@/components/BookingForm';
 import { CabinInfo } from '@/components/CabinInfo';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
   const [selectedDates, setSelectedDates] = useState<{ from: Date | undefined; to: Date | undefined }>({
@@ -22,6 +24,11 @@ const Index = () => {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">Family Cabin Booking</h1>
           <p className="text-xl text-muted-foreground">Book your perfect cabin getaway</p>
+          <div className="mt-4">
+            <Link to="/admin">
+              <Button variant="outline" size="sm">Admin Panel</Button>
+            </Link>
+          </div>
         </div>
 
         <Tabs defaultValue="booking" className="w-full">
