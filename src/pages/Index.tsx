@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { BookingCalendar } from '@/components/BookingCalendar';
 import { BookingForm } from '@/components/BookingForm';
 import { CabinInfo } from '@/components/CabinInfo';
+import SuppliesList from '@/components/SuppliesList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -32,9 +33,10 @@ const Index = () => {
         </div>
 
         <Tabs defaultValue="booking" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="booking">Make a Booking</TabsTrigger>
             <TabsTrigger value="info">Cabin Information</TabsTrigger>
+            <TabsTrigger value="supplies">Shopping List</TabsTrigger>
           </TabsList>
 
           <TabsContent value="booking">
@@ -54,6 +56,12 @@ const Index = () => {
           <TabsContent value="info">
             <div className="max-w-4xl mx-auto">
               <CabinInfo />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="supplies">
+            <div className="max-w-2xl mx-auto">
+              <SuppliesList />
             </div>
           </TabsContent>
         </Tabs>

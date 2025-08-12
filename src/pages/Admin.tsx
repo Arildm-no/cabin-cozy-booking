@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format, parseISO } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, ShoppingCart, AlertTriangle } from 'lucide-react';
 
 interface Booking {
   id: string;
@@ -32,17 +32,29 @@ interface CabinInfo {
   icon: string;
 }
 
+interface Supply {
+  id: string;
+  item_name: string;
+  notes: string | null;
+  is_urgent: boolean;
+  created_at: string;
+}
+
 const Admin = () => {
   const [pendingBookings, setPendingBookings] = useState<Booking[]>([]);
   const [cabinInfo, setCabinInfo] = useState<CabinInfo[]>([]);
+  const [supplies, setSupplies] = useState<Supply[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingInfo, setEditingInfo] = useState<CabinInfo | null>(null);
+  const [editingSupply, setEditingSupply] = useState<Supply | null>(null);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
+  const [isCreatingNewSupply, setIsCreatingNewSupply] = useState(false);
   const [newInfo, setNewInfo] = useState({ category: '', title: '', content: '', icon: 'info' });
+  const [newSupply, setNewSupply] = useState({ item_name: '', notes: '', is_urgent: false });
   const { toast } = useToast();
 
   useEffect(() => {
-    Promise.all([fetchPendingBookings(), fetchCabinInfo()]);
+    Promise.all([fetchPendingBookings(), fetchCabinInfo(), fetchSupplies()]);
   }, []);
 
   const fetchPendingBookings = async () => {
@@ -81,6 +93,26 @@ const Admin = () => {
       toast({
         title: "Error",
         description: "Failed to load cabin information",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchSupplies = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('supplies' as any)
+        .select('*')
+        .order('is_urgent', { ascending: false })
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setSupplies((data as unknown as Supply[]) || []);
+    } catch (error) {
+      console.error('Error fetching supplies:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load supplies",
         variant: "destructive",
       });
     }
@@ -202,6 +234,96 @@ const Admin = () => {
     }
   };
 
+  const handleCreateSupply = async () => {
+    if (!newSupply.item_name) {
+      toast({
+        title: "Error",
+        description: "Please enter an item name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('supplies' as any)
+        .insert([newSupply]);
+
+      if (error) throw error;
+
+      await fetchSupplies();
+      setIsCreatingNewSupply(false);
+      setNewSupply({ item_name: '', notes: '', is_urgent: false });
+      
+      toast({
+        title: "Success",
+        description: "Supply item added successfully",
+      });
+    } catch (error) {
+      console.error('Error creating supply:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add supply item",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveSupply = async (supply: Supply) => {
+    try {
+      const { error } = await supabase
+        .from('supplies' as any)
+        .update({
+          item_name: supply.item_name,
+          notes: supply.notes,
+          is_urgent: supply.is_urgent
+        })
+        .eq('id', supply.id);
+
+      if (error) throw error;
+
+      await fetchSupplies();
+      setEditingSupply(null);
+      
+      toast({
+        title: "Success",
+        description: "Supply item updated successfully",
+      });
+    } catch (error) {
+      console.error('Error updating supply:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update supply item",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteSupply = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('supplies' as any)
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      await fetchSupplies();
+      
+      toast({
+        title: "Success",
+        description: "Supply item deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting supply:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete supply item",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -219,9 +341,10 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="bookings" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="bookings">Pending Bookings</TabsTrigger>
             <TabsTrigger value="cabin-info">Cabin Information</TabsTrigger>
+            <TabsTrigger value="supplies">Supplies</TabsTrigger>
           </TabsList>
           
           <TabsContent value="bookings">
@@ -422,6 +545,139 @@ const Admin = () => {
                       )}
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="supplies">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <ShoppingCart className="h-5 w-5" />
+                  Shopping List
+                </CardTitle>
+                <Button onClick={() => setIsCreatingNewSupply(true)} size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Item
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {isCreatingNewSupply && (
+                  <div className="border rounded-lg p-4 mb-4 bg-muted/50">
+                    <h3 className="font-semibold mb-3">Add New Supply Item</h3>
+                    <Input
+                      placeholder="Item name (e.g., Toilet Paper, Dish Soap)"
+                      value={newSupply.item_name}
+                      onChange={(e) => setNewSupply({...newSupply, item_name: e.target.value})}
+                      className="mb-4"
+                    />
+                    <Textarea
+                      placeholder="Notes (optional)"
+                      value={newSupply.notes}
+                      onChange={(e) => setNewSupply({...newSupply, notes: e.target.value})}
+                      className="mb-4"
+                      rows={2}
+                    />
+                    <div className="flex items-center gap-2 mb-4">
+                      <input
+                        type="checkbox"
+                        id="urgent"
+                        checked={newSupply.is_urgent}
+                        onChange={(e) => setNewSupply({...newSupply, is_urgent: e.target.checked})}
+                        className="rounded"
+                      />
+                      <label htmlFor="urgent" className="text-sm flex items-center gap-1">
+                        <AlertTriangle className="h-4 w-4 text-destructive" />
+                        Mark as urgent
+                      </label>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={handleCreateSupply} size="sm">
+                        Add Item
+                      </Button>
+                      <Button 
+                        onClick={() => {
+                          setIsCreatingNewSupply(false);
+                          setNewSupply({ item_name: '', notes: '', is_urgent: false });
+                        }} 
+                        variant="outline" 
+                        size="sm"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  {supplies.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">No supplies needed</p>
+                  ) : (
+                    supplies.map((supply) => (
+                      <div key={supply.id} className="border rounded-lg p-4">
+                        {editingSupply?.id === supply.id ? (
+                          <div className="space-y-4">
+                            <Input
+                              value={editingSupply.item_name}
+                              onChange={(e) => setEditingSupply({...editingSupply, item_name: e.target.value})}
+                            />
+                            <Textarea
+                              value={editingSupply.notes || ''}
+                              onChange={(e) => setEditingSupply({...editingSupply, notes: e.target.value})}
+                              rows={2}
+                            />
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                id={`urgent-${supply.id}`}
+                                checked={editingSupply.is_urgent}
+                                onChange={(e) => setEditingSupply({...editingSupply, is_urgent: e.target.checked})}
+                                className="rounded"
+                              />
+                              <label htmlFor={`urgent-${supply.id}`} className="text-sm flex items-center gap-1">
+                                <AlertTriangle className="h-4 w-4 text-destructive" />
+                                Mark as urgent
+                              </label>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button onClick={() => handleSaveSupply(editingSupply)} size="sm">
+                                Save
+                              </Button>
+                              <Button onClick={() => setEditingSupply(null)} variant="outline" size="sm">
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="font-semibold">{supply.item_name}</h3>
+                                {supply.is_urgent && (
+                                  <Badge variant="destructive" className="flex items-center gap-1">
+                                    <AlertTriangle className="h-3 w-3" />
+                                    Urgent
+                                  </Badge>
+                                )}
+                              </div>
+                              {supply.notes && (
+                                <p className="text-sm text-muted-foreground">{supply.notes}</p>
+                              )}
+                            </div>
+                            <div className="flex gap-2 ml-4">
+                              <Button onClick={() => setEditingSupply(supply)} variant="outline" size="sm">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button onClick={() => handleDeleteSupply(supply.id)} variant="destructive" size="sm">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
