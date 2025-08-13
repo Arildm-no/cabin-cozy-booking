@@ -13,6 +13,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { LoginForm } from '@/components/LoginForm';
 import { Plus, Edit, Trash2, ShoppingCart, AlertTriangle, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import ProjectsForm from '@/components/ProjectsForm';
+import ProjectsList from '@/components/ProjectsList';
 
 interface Booking {
   id: string;
@@ -55,6 +57,7 @@ const Admin = () => {
   const [isCreatingNewSupply, setIsCreatingNewSupply] = useState(false);
   const [newInfo, setNewInfo] = useState({ category: '', title: '', content: '', icon: 'info' });
   const [newSupply, setNewSupply] = useState({ item_name: '', notes: '', is_urgent: false });
+  const [refreshProjects, setRefreshProjects] = useState(false);
   const { toast } = useToast();
 
   if (!isAuthenticated) {
@@ -358,10 +361,11 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="bookings" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="bookings">Pending Bookings</TabsTrigger>
             <TabsTrigger value="cabin-info">Cabin Information</TabsTrigger>
             <TabsTrigger value="supplies">Supplies</TabsTrigger>
+            <TabsTrigger value="projects">Projects</TabsTrigger>
           </TabsList>
           
           <TabsContent value="bookings">
@@ -698,6 +702,20 @@ const Admin = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="projects">
+            <div className="grid gap-6 md:grid-cols-2">
+              <ProjectsForm 
+                onProjectAdded={() => {
+                  setRefreshProjects(true);
+                }}
+              />
+              <ProjectsList 
+                refresh={refreshProjects}
+                onRefreshComplete={() => setRefreshProjects(false)}
+              />
+            </div>
           </TabsContent>
         </Tabs>
       </div>

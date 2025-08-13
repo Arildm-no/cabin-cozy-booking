@@ -104,6 +104,69 @@ export type Database = {
         }
         Relationships: []
       }
+      projects: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_completed: boolean
+          priority: string | null
+          target_month: number
+          target_year: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_completed?: boolean
+          priority?: string | null
+          target_month: number
+          target_year: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_completed?: boolean
+          priority?: string | null
+          target_month?: number
+          target_year?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      supplies: {
+        Row: {
+          created_at: string
+          id: string
+          is_urgent: boolean
+          item_name: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_urgent?: boolean
+          item_name: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_urgent?: boolean
+          item_name?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

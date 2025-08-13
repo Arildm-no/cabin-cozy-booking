@@ -37,6 +37,9 @@ const Index = () => {
             <Link to="/admin">
               <Button variant="outline" size="sm">Admin Panel</Button>
             </Link>
+            <Link to="/projects">
+              <Button variant="outline" size="sm">Projects</Button>
+            </Link>
             <Button variant="outline" size="sm" onClick={logout}>
               <LogOut className="h-4 w-4 mr-2" />
               Logout
