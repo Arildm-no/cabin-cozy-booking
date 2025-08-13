@@ -6,8 +6,12 @@ import SuppliesList from '@/components/SuppliesList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { LoginForm } from '@/components/LoginForm';
+import { useAuth } from '@/hooks/useAuth';
+import { LogOut } from 'lucide-react';
 
 const Index = () => {
+  const { isAuthenticated, logout } = useAuth();
   const [selectedDates, setSelectedDates] = useState<{ from: Date | undefined; to: Date | undefined }>({
     from: undefined,
     to: undefined
@@ -19,16 +23,24 @@ const Index = () => {
     setRefreshCalendar(prev => prev + 1);
   };
 
+  if (!isAuthenticated) {
+    return <LoginForm />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-8 px-4">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">Family Cabin Booking</h1>
           <p className="text-xl text-muted-foreground">Book your perfect cabin getaway</p>
-          <div className="mt-4">
+          <div className="mt-4 flex gap-2 justify-center">
             <Link to="/admin">
               <Button variant="outline" size="sm">Admin Panel</Button>
             </Link>
+            <Button variant="outline" size="sm" onClick={logout}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
           </div>
         </div>
 

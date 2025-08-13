@@ -9,7 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format, parseISO } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, ShoppingCart, AlertTriangle } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { LoginForm } from '@/components/LoginForm';
+import { Plus, Edit, Trash2, ShoppingCart, AlertTriangle, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface Booking {
   id: string;
@@ -41,6 +44,7 @@ interface Supply {
 }
 
 const Admin = () => {
+  const { isAuthenticated, logout } = useAuth();
   const [pendingBookings, setPendingBookings] = useState<Booking[]>([]);
   const [cabinInfo, setCabinInfo] = useState<CabinInfo[]>([]);
   const [supplies, setSupplies] = useState<Supply[]>([]);
@@ -52,6 +56,10 @@ const Admin = () => {
   const [newInfo, setNewInfo] = useState({ category: '', title: '', content: '', icon: 'info' });
   const [newSupply, setNewSupply] = useState({ item_name: '', notes: '', is_urgent: false });
   const { toast } = useToast();
+
+  if (!isAuthenticated) {
+    return <LoginForm />;
+  }
 
   useEffect(() => {
     Promise.all([fetchPendingBookings(), fetchCabinInfo(), fetchSupplies()]);
@@ -338,6 +346,15 @@ const Admin = () => {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">Admin Panel</h1>
           <p className="text-xl text-muted-foreground">Manage bookings and cabin information</p>
+          <div className="mt-4 flex gap-2 justify-center">
+            <Link to="/">
+              <Button variant="outline" size="sm">Home</Button>
+            </Link>
+            <Button variant="outline" size="sm" onClick={logout}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="bookings" className="w-full">
