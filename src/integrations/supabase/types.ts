@@ -104,6 +104,33 @@ export type Database = {
         }
         Relationships: []
       }
+      supplies: {
+        Row: {
+          created_at: string
+          id: string
+          is_urgent: boolean
+          item_name: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_urgent?: boolean
+          item_name: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_urgent?: boolean
+          item_name?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
