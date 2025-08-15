@@ -97,13 +97,18 @@ export const BookingCalendar = ({ onDateSelect, selectedDates }: BookingCalendar
             ) : (
               bookings.map((booking) => (
                 <div key={booking.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium">{booking.user_name}</p>
                     <p className="text-sm text-muted-foreground">
                       {format(parseISO(booking.start_date), 'MMM d')} - {format(parseISO(booking.end_date), 'MMM d, yyyy')}
                     </p>
+                    {booking.notes && (
+                      <p className="text-sm text-muted-foreground mt-1 italic">
+                        Note: {booking.notes}
+                      </p>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 ml-4">
                     <Badge variant="secondary">{booking.guests_count} guests</Badge>
                     <Badge variant="default">Approved</Badge>
                   </div>
