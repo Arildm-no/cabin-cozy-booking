@@ -97,18 +97,16 @@ const Projects = () => {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <Link to="/">
-              <Button variant="outline" size="sm">
-                <Home className="h-4 w-4 mr-2" />
-                Home
-              </Button>
-            </Link>
-            <h1 className="text-4xl font-bold text-foreground">Cabin Projects</h1>
-          </div>
-          <p className="text-xl text-muted-foreground">
+          <h1 className="text-4xl font-bold text-foreground mb-4">Cabin Projects</h1>
+          <p className="text-xl text-muted-foreground mb-4">
             Upcoming maintenance and improvement projects
           </p>
+          <Link to="/">
+            <Button variant="outline" size="sm">
+              <Home className="h-4 w-4 mr-2" />
+              Home
+            </Button>
+          </Link>
         </div>
 
         {/* Upcoming Projects */}
