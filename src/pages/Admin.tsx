@@ -48,6 +48,7 @@ interface Supply {
 const Admin = () => {
   const { isAuthenticated, logout } = useAuth();
   const [pendingBookings, setPendingBookings] = useState<Booking[]>([]);
+  const [approvedBookings, setApprovedBookings] = useState<Booking[]>([]);
   const [cabinInfo, setCabinInfo] = useState<CabinInfo[]>([]);
   const [supplies, setSupplies] = useState<Supply[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,7 +63,7 @@ const Admin = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      Promise.all([fetchPendingBookings(), fetchCabinInfo(), fetchSupplies()]);
+      Promise.all([fetchPendingBookings(), fetchApprovedBookings(), fetchCabinInfo(), fetchSupplies()]);
     }
   }, [isAuthenticated]);
 
@@ -85,6 +86,26 @@ const Admin = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchApprovedBookings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('status', 'approved')
+        .order('start_date', { ascending: true });
+
+      if (error) throw error;
+      setApprovedBookings(data || []);
+    } catch (error) {
+      console.error('Error fetching approved bookings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load approved bookings",
+        variant: "destructive",
+      });
     }
   };
 
@@ -137,6 +158,9 @@ const Admin = () => {
       if (error) throw error;
 
       setPendingBookings(prev => prev.filter(booking => booking.id !== bookingId));
+      if (action === 'approved') {
+        await fetchApprovedBookings();
+      }
       
       toast({
         title: "Success",
@@ -147,6 +171,31 @@ const Admin = () => {
       toast({
         title: "Error",
         description: `Failed to ${action.slice(0, -1)} booking`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteApprovedBooking = async (bookingId: string) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .delete()
+        .eq('id', bookingId);
+
+      if (error) throw error;
+
+      setApprovedBookings(prev => prev.filter(booking => booking.id !== bookingId));
+      
+      toast({
+        title: "Success",
+        description: "Booking deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting booking:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete booking",
         variant: "destructive",
       });
     }
@@ -363,8 +412,9 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="bookings" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="bookings">Pending Bookings</TabsTrigger>
+            <TabsTrigger value="approved-bookings">Approved Bookings</TabsTrigger>
             <TabsTrigger value="cabin-info">Cabin Information</TabsTrigger>
             <TabsTrigger value="supplies">Supplies</TabsTrigger>
             <TabsTrigger value="projects">Projects</TabsTrigger>
@@ -419,6 +469,59 @@ const Admin = () => {
                             size="sm"
                           >
                             Decline
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="approved-bookings">
+            <Card>
+              <CardHeader>
+                <CardTitle>Approved Bookings ({approvedBookings.length})</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {approvedBookings.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">No approved bookings</p>
+                ) : (
+                  <div className="space-y-4">
+                    {approvedBookings.map((booking) => (
+                      <div key={booking.id} className="border rounded-lg p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="font-semibold text-lg">{booking.user_name}</h3>
+                            <p className="text-sm text-muted-foreground">{booking.user_email}</p>
+                            <p className="text-sm text-muted-foreground">{booking.user_phone}</p>
+                          </div>
+                          <Badge variant="default">{booking.guests_count} guests</Badge>
+                        </div>
+                        
+                        <div className="bg-muted/50 p-3 rounded">
+                          <p className="font-medium">
+                            {format(parseISO(booking.start_date), 'MMM d, yyyy')} - {format(parseISO(booking.end_date), 'MMM d, yyyy')}
+                          </p>
+                          {booking.notes && (
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Notes: {booking.notes}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Approved: {format(parseISO(booking.created_at), 'MMM d, yyyy HH:mm')}
+                          </p>
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button 
+                            onClick={() => handleDeleteApprovedBooking(booking.id)}
+                            variant="destructive"
+                            size="sm"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Booking
                           </Button>
                         </div>
                       </div>
