@@ -60,13 +60,11 @@ const Admin = () => {
   const [refreshProjects, setRefreshProjects] = useState(false);
   const { toast } = useToast();
 
-  if (!isAuthenticated) {
-    return <LoginForm />;
-  }
-
   useEffect(() => {
-    Promise.all([fetchPendingBookings(), fetchCabinInfo(), fetchSupplies()]);
-  }, []);
+    if (isAuthenticated) {
+      Promise.all([fetchPendingBookings(), fetchCabinInfo(), fetchSupplies()]);
+    }
+  }, [isAuthenticated]);
 
   const fetchPendingBookings = async () => {
     try {
@@ -334,6 +332,10 @@ const Admin = () => {
       });
     }
   };
+
+  if (!isAuthenticated) {
+    return <LoginForm />;
+  }
 
   if (loading) {
     return (
