@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, CheckCircle, Clock, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, CheckCircle, Clock, AlertTriangle, Home } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 interface Project {
   id: string;
@@ -95,7 +97,15 @@ const Projects = () => {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-4">Cabin Projects</h1>
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <Link to="/">
+              <Button variant="outline" size="sm">
+                <Home className="h-4 w-4 mr-2" />
+                Home
+              </Button>
+            </Link>
+            <h1 className="text-4xl font-bold text-foreground">Cabin Projects</h1>
+          </div>
           <p className="text-xl text-muted-foreground">
             Upcoming maintenance and improvement projects
           </p>
