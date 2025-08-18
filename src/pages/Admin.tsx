@@ -45,13 +45,6 @@ interface Supply {
   created_at: string;
 }
 
-interface User {
-  id: string;
-  username: string;
-  is_active: boolean;
-  created_at: string;
-}
-
 const Admin = () => {
   const { isAuthenticated, logout } = useAuth();
   const [pendingBookings, setPendingBookings] = useState<Booking[]>([]);
@@ -66,16 +59,11 @@ const Admin = () => {
   const [newInfo, setNewInfo] = useState({ category: '', title: '', content: '', icon: 'info' });
   const [newSupply, setNewSupply] = useState({ item_name: '', notes: '', is_urgent: false });
   const [refreshProjects, setRefreshProjects] = useState(false);
-  const [users, setUsers] = useState<User[]>([]);
-  const [newUsername, setNewUsername] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [resetPasswordUserId, setResetPasswordUserId] = useState('');
-  const [resetPasswordValue, setResetPasswordValue] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
     if (isAuthenticated) {
-      Promise.all([fetchPendingBookings(), fetchApprovedBookings(), fetchCabinInfo(), fetchSupplies(), fetchUsers()]);
+      Promise.all([fetchPendingBookings(), fetchApprovedBookings(), fetchCabinInfo(), fetchSupplies()]);
     }
   }, [isAuthenticated]);
 
@@ -394,140 +382,6 @@ const Admin = () => {
     }
   };
 
-  const fetchUsers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      setUsers(data || []);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load users",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const addUser = async () => {
-    if (!newUsername.trim() || !newPassword.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter both username and password",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('users')
-        .insert([{
-          username: newUsername.trim(),
-          password_hash: newPassword, // In production, this should be properly hashed
-          is_active: true
-        }]);
-
-      if (error) throw error;
-
-      await fetchUsers();
-      setNewUsername('');
-      setNewPassword('');
-      
-      toast({
-        title: "Success",
-        description: "User added successfully",
-      });
-    } catch (error) {
-      console.error('Error adding user:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add user. Username might already exist.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const toggleUserStatus = async (userId: string, isActive: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('users')
-        .update({ is_active: isActive })
-        .eq('id', userId);
-
-      if (error) throw error;
-
-      await fetchUsers();
-      
-      toast({
-        title: "Success",
-        description: `User ${isActive ? 'activated' : 'deactivated'} successfully`,
-      });
-    } catch (error) {
-      console.error('Error updating user status:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update user status",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const deleteUser = async (userId: string) => {
-    try {
-      const { error } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', userId);
-
-      if (error) throw error;
-
-      await fetchUsers();
-      
-      toast({
-        title: "Success",
-        description: "User deleted successfully",
-      });
-    } catch (error) {
-      console.error('Error deleting user:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete user",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const resetPassword = async (userId: string, newPassword: string) => {
-    try {
-      const { error } = await supabase
-        .from('users')
-        .update({ password_hash: newPassword })
-        .eq('id', userId);
-
-      if (error) throw error;
-
-      setResetPasswordUserId('');
-      setResetPasswordValue('');
-      
-      toast({
-        title: "Success",
-        description: "Password reset successfully",
-      });
-    } catch (error) {
-      console.error('Error resetting password:', error);
-      toast({
-        title: "Error",
-        description: "Failed to reset password",
-        variant: "destructive",
-      });
-    }
-  };
-
   if (!isAuthenticated) {
     return <LoginForm />;
   }
@@ -558,13 +412,12 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="bookings" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="bookings">Pending Bookings</TabsTrigger>
             <TabsTrigger value="approved-bookings">Approved Bookings</TabsTrigger>
             <TabsTrigger value="cabin-info">Cabin Information</TabsTrigger>
             <TabsTrigger value="supplies">Supplies</TabsTrigger>
             <TabsTrigger value="projects">Projects</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
           </TabsList>
           
           <TabsContent value="bookings">
@@ -967,132 +820,6 @@ const Admin = () => {
                 refresh={refreshProjects}
                 onRefreshComplete={() => setRefreshProjects(false)}
               />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="users">
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Plus className="h-5 w-5" />
-                    Add New User
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Username</label>
-                      <Input
-                        placeholder="Enter username"
-                        value={newUsername}
-                        onChange={(e) => setNewUsername(e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Password</label>
-                      <Input
-                        type="password"
-                        placeholder="Enter password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                      />
-                    </div>
-                    <Button 
-                      onClick={addUser}
-                      disabled={!newUsername.trim() || !newPassword.trim()}
-                      className="w-full"
-                    >
-                      Add User
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Existing Users</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {users.length === 0 ? (
-                      <p className="text-muted-foreground text-center py-4">No users found</p>
-                    ) : (
-                       users.map((user) => (
-                         <div key={user.id} className="space-y-3">
-                           <div className="flex items-center justify-between p-3 border rounded-lg">
-                             <div className="flex-1">
-                               <div className="flex items-center gap-2">
-                                 <h3 className="font-medium">{user.username}</h3>
-                                 <Badge variant={user.is_active ? "default" : "destructive"}>
-                                   {user.is_active ? "Active" : "Inactive"}
-                                 </Badge>
-                               </div>
-                               <p className="text-sm text-muted-foreground">
-                                 Created: {format(parseISO(user.created_at), 'MMM d, yyyy')}
-                               </p>
-                             </div>
-                             <div className="flex gap-2">
-                               <Button
-                                 size="sm"
-                                 variant={user.is_active ? "destructive" : "default"}
-                                 onClick={() => toggleUserStatus(user.id, !user.is_active)}
-                               >
-                                 {user.is_active ? "Deactivate" : "Activate"}
-                               </Button>
-                               <Button
-                                 size="sm"
-                                 variant="outline"
-                                 onClick={() => setResetPasswordUserId(user.id)}
-                               >
-                                 Reset Password
-                               </Button>
-                               <Button
-                                 size="sm"
-                                 variant="destructive"
-                                 onClick={() => deleteUser(user.id)}
-                               >
-                                 <Trash2 className="h-4 w-4" />
-                               </Button>
-                             </div>
-                           </div>
-                           {resetPasswordUserId === user.id && (
-                             <div className="p-3 border rounded-lg bg-muted/50">
-                               <h4 className="font-medium mb-2">Reset Password for {user.username}</h4>
-                               <div className="flex gap-2">
-                                 <Input
-                                   type="password"
-                                   placeholder="Enter new password"
-                                   value={resetPasswordValue}
-                                   onChange={(e) => setResetPasswordValue(e.target.value)}
-                                   className="flex-1"
-                                 />
-                                 <Button
-                                   size="sm"
-                                   onClick={() => resetPassword(user.id, resetPasswordValue)}
-                                   disabled={!resetPasswordValue.trim()}
-                                 >
-                                   Update
-                                 </Button>
-                                 <Button
-                                   size="sm"
-                                   variant="outline"
-                                   onClick={() => {
-                                     setResetPasswordUserId('');
-                                     setResetPasswordValue('');
-                                   }}
-                                 >
-                                   Cancel
-                                 </Button>
-                               </div>
-                             </div>
-                           )}
-                         </div>
-                      ))
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </TabsContent>
         </Tabs>
