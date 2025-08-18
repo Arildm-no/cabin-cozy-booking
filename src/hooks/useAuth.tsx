@@ -1,8 +1,9 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (username: string, password: string) => boolean;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -31,13 +32,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, []);
 
-  const login = (username: string, password: string): boolean => {
-    if (username === 'Blefjell' && password === 'Blefjell') {
+  const login = async (username: string, password: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('username', username)
+        .eq('password_hash', password)
+        .eq('is_active', true)
+        .single();
+
+      if (error || !data) {
+        return false;
+      }
+
       setIsAuthenticated(true);
       localStorage.setItem('blefjell-auth', 'true');
       return true;
+    } catch (error) {
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
