@@ -69,6 +69,8 @@ const Admin = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [resetPasswordUserId, setResetPasswordUserId] = useState('');
+  const [resetPasswordValue, setResetPasswordValue] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -495,6 +497,32 @@ const Admin = () => {
       toast({
         title: "Error",
         description: "Failed to delete user",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const resetPassword = async (userId: string, newPassword: string) => {
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ password_hash: newPassword })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      setResetPasswordUserId('');
+      setResetPasswordValue('');
+      
+      toast({
+        title: "Success",
+        description: "Password reset successfully",
+      });
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reset password",
         variant: "destructive",
       });
     }
@@ -990,36 +1018,76 @@ const Admin = () => {
                     {users.length === 0 ? (
                       <p className="text-muted-foreground text-center py-4">No users found</p>
                     ) : (
-                      users.map((user) => (
-                        <div key={user.id} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-medium">{user.username}</h3>
-                              <Badge variant={user.is_active ? "default" : "destructive"}>
-                                {user.is_active ? "Active" : "Inactive"}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              Created: {format(parseISO(user.created_at), 'MMM d, yyyy')}
-                            </p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant={user.is_active ? "destructive" : "default"}
-                              onClick={() => toggleUserStatus(user.id, !user.is_active)}
-                            >
-                              {user.is_active ? "Deactivate" : "Activate"}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => deleteUser(user.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
+                       users.map((user) => (
+                         <div key={user.id} className="space-y-3">
+                           <div className="flex items-center justify-between p-3 border rounded-lg">
+                             <div className="flex-1">
+                               <div className="flex items-center gap-2">
+                                 <h3 className="font-medium">{user.username}</h3>
+                                 <Badge variant={user.is_active ? "default" : "destructive"}>
+                                   {user.is_active ? "Active" : "Inactive"}
+                                 </Badge>
+                               </div>
+                               <p className="text-sm text-muted-foreground">
+                                 Created: {format(parseISO(user.created_at), 'MMM d, yyyy')}
+                               </p>
+                             </div>
+                             <div className="flex gap-2">
+                               <Button
+                                 size="sm"
+                                 variant={user.is_active ? "destructive" : "default"}
+                                 onClick={() => toggleUserStatus(user.id, !user.is_active)}
+                               >
+                                 {user.is_active ? "Deactivate" : "Activate"}
+                               </Button>
+                               <Button
+                                 size="sm"
+                                 variant="outline"
+                                 onClick={() => setResetPasswordUserId(user.id)}
+                               >
+                                 Reset Password
+                               </Button>
+                               <Button
+                                 size="sm"
+                                 variant="destructive"
+                                 onClick={() => deleteUser(user.id)}
+                               >
+                                 <Trash2 className="h-4 w-4" />
+                               </Button>
+                             </div>
+                           </div>
+                           {resetPasswordUserId === user.id && (
+                             <div className="p-3 border rounded-lg bg-muted/50">
+                               <h4 className="font-medium mb-2">Reset Password for {user.username}</h4>
+                               <div className="flex gap-2">
+                                 <Input
+                                   type="password"
+                                   placeholder="Enter new password"
+                                   value={resetPasswordValue}
+                                   onChange={(e) => setResetPasswordValue(e.target.value)}
+                                   className="flex-1"
+                                 />
+                                 <Button
+                                   size="sm"
+                                   onClick={() => resetPassword(user.id, resetPasswordValue)}
+                                   disabled={!resetPasswordValue.trim()}
+                                 >
+                                   Update
+                                 </Button>
+                                 <Button
+                                   size="sm"
+                                   variant="outline"
+                                   onClick={() => {
+                                     setResetPasswordUserId('');
+                                     setResetPasswordValue('');
+                                   }}
+                                 >
+                                   Cancel
+                                 </Button>
+                               </div>
+                             </div>
+                           )}
+                         </div>
                       ))
                     )}
                   </div>
