@@ -45,25 +45,38 @@ interface Supply {
   created_at: string;
 }
 
+interface User {
+  id: string;
+  username: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 const Admin = () => {
   const { isAuthenticated, logout } = useAuth();
   const [pendingBookings, setPendingBookings] = useState<Booking[]>([]);
   const [approvedBookings, setApprovedBookings] = useState<Booking[]>([]);
   const [cabinInfo, setCabinInfo] = useState<CabinInfo[]>([]);
   const [supplies, setSupplies] = useState<Supply[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingInfo, setEditingInfo] = useState<CabinInfo | null>(null);
   const [editingSupply, setEditingSupply] = useState<Supply | null>(null);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [isCreatingNewSupply, setIsCreatingNewSupply] = useState(false);
+  const [isCreatingNewUser, setIsCreatingNewUser] = useState(false);
   const [newInfo, setNewInfo] = useState({ category: '', title: '', content: '', icon: 'info' });
   const [newSupply, setNewSupply] = useState({ item_name: '', notes: '', is_urgent: false });
+  const [newUser, setNewUser] = useState({ username: '', password: '' });
+  const [resetPasswordUser, setResetPasswordUser] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState('');
   const [refreshProjects, setRefreshProjects] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     if (isAuthenticated) {
-      Promise.all([fetchPendingBookings(), fetchApprovedBookings(), fetchCabinInfo(), fetchSupplies()]);
+      Promise.all([fetchPendingBookings(), fetchApprovedBookings(), fetchCabinInfo(), fetchSupplies(), fetchUsers()]);
     }
   }, [isAuthenticated]);
 
@@ -143,6 +156,25 @@ const Admin = () => {
       toast({
         title: "Error",
         description: "Failed to load supplies",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .order('username');
+
+      if (error) throw error;
+      setUsers(data || []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load users",
         variant: "destructive",
       });
     }
@@ -382,6 +414,129 @@ const Admin = () => {
     }
   };
 
+  const handleCreateUser = async () => {
+    if (!newUser.username || !newUser.password) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .insert([{
+          username: newUser.username,
+          password_hash: newUser.password  // This will be hashed by the trigger
+        }]);
+
+      if (error) throw error;
+
+      await fetchUsers();
+      setIsCreatingNewUser(false);
+      setNewUser({ username: '', password: '' });
+      
+      toast({
+        title: "Success",
+        description: "User created successfully",
+      });
+    } catch (error) {
+      console.error('Error creating user:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create user",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update({ is_active: !currentStatus })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      await fetchUsers();
+      
+      toast({
+        title: "Success",
+        description: `User ${!currentStatus ? 'activated' : 'deactivated'} successfully`,
+      });
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update user status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!resetPasswordUser || !newPassword) {
+      toast({
+        title: "Error",
+        description: "Please enter a new password",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.rpc('update_user_password', {
+        username_input: resetPasswordUser,
+        new_password: newPassword
+      });
+
+      if (error) throw error;
+
+      setResetPasswordUser(null);
+      setNewPassword('');
+      
+      toast({
+        title: "Success",
+        description: "Password reset successfully",
+      });
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reset password",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      await fetchUsers();
+      
+      toast({
+        title: "Success",
+        description: "User deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete user",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (!isAuthenticated) {
     return <LoginForm />;
   }
@@ -412,12 +567,13 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="bookings" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="bookings">Pending Bookings</TabsTrigger>
             <TabsTrigger value="approved-bookings">Approved Bookings</TabsTrigger>
             <TabsTrigger value="cabin-info">Cabin Information</TabsTrigger>
             <TabsTrigger value="supplies">Supplies</TabsTrigger>
             <TabsTrigger value="projects">Projects</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
           </TabsList>
           
           <TabsContent value="bookings">
@@ -821,6 +977,127 @@ const Admin = () => {
                 onRefreshComplete={() => setRefreshProjects(false)}
               />
             </div>
+          </TabsContent>
+
+          <TabsContent value="users">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>User Management</CardTitle>
+                <Button onClick={() => setIsCreatingNewUser(true)} size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add User
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {isCreatingNewUser && (
+                  <div className="border rounded-lg p-4 mb-4 bg-muted/50">
+                    <h3 className="font-semibold mb-3">Add New User</h3>
+                    <Input
+                      placeholder="Username"
+                      value={newUser.username}
+                      onChange={(e) => setNewUser({...newUser, username: e.target.value})}
+                      className="mb-4"
+                    />
+                    <Input
+                      type="password"
+                      placeholder="Password"
+                      value={newUser.password}
+                      onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                      className="mb-4"
+                    />
+                    <div className="flex gap-2">
+                      <Button onClick={handleCreateUser} size="sm">
+                        Create User
+                      </Button>
+                      <Button 
+                        onClick={() => {
+                          setIsCreatingNewUser(false);
+                          setNewUser({ username: '', password: '' });
+                        }} 
+                        variant="outline" 
+                        size="sm"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  {users.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">No users found</p>
+                  ) : (
+                    users.map((user) => (
+                      <div key={user.id} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div>
+                              <h3 className="font-semibold">{user.username}</h3>
+                              <p className="text-xs text-muted-foreground">
+                                Created: {format(parseISO(user.created_at), 'MMM d, yyyy')}
+                              </p>
+                            </div>
+                            <Badge variant={user.is_active ? "default" : "secondary"}>
+                              {user.is_active ? "Active" : "Inactive"}
+                            </Badge>
+                          </div>
+                          <div className="flex gap-2">
+                            {resetPasswordUser === user.username ? (
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="password"
+                                  placeholder="New password"
+                                  value={newPassword}
+                                  onChange={(e) => setNewPassword(e.target.value)}
+                                  className="w-32"
+                                />
+                                <Button onClick={handleResetPassword} size="sm">
+                                  Set
+                                </Button>
+                                <Button 
+                                  onClick={() => {
+                                    setResetPasswordUser(null);
+                                    setNewPassword('');
+                                  }} 
+                                  variant="outline" 
+                                  size="sm"
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            ) : (
+                              <>
+                                <Button 
+                                  onClick={() => setResetPasswordUser(user.username)}
+                                  variant="outline" 
+                                  size="sm"
+                                >
+                                  Reset Password
+                                </Button>
+                                <Button 
+                                  onClick={() => handleToggleUserStatus(user.id, user.is_active)}
+                                  variant={user.is_active ? "secondary" : "default"}
+                                  size="sm"
+                                >
+                                  {user.is_active ? "Deactivate" : "Activate"}
+                                </Button>
+                                <Button 
+                                  onClick={() => handleDeleteUser(user.id)}
+                                  variant="destructive" 
+                                  size="sm"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

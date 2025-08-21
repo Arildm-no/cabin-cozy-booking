@@ -12,10 +12,10 @@ export const LoginForm = () => {
   const { login } = useAuth();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const success = login(username, password);
+    const success = await login(username, password);
     
     if (!success) {
       toast({
