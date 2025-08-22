@@ -429,10 +429,26 @@ const Admin = () => {
         .from('users')
         .insert([{
           username: newUser.username,
-          password_hash: newUser.password  // This will be hashed by the trigger
+          password_hash: newUser.password
         }]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        if (error.code === '23505') {
+          toast({
+            title: "Error",
+            description: "Username already exists",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: `Failed to create user: ${error.message}`,
+            variant: "destructive",
+          });
+        }
+        return;
+      }
 
       await fetchUsers();
       setIsCreatingNewUser(false);
