@@ -81,6 +81,7 @@ export const BookingCalendar = ({ onDateSelect, selectedDates }: BookingCalendar
             selected={selectedDates}
             onSelect={(range) => onDateSelect({ from: range?.from, to: range?.to })}
             disabled={isDateBooked}
+            weekStartsOn={1}
             modifiers={{
               booked: isDateBooked
             }}
