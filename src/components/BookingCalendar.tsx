@@ -81,6 +81,12 @@ export const BookingCalendar = ({ onDateSelect, selectedDates }: BookingCalendar
             selected={selectedDates}
             onSelect={(range) => onDateSelect({ from: range?.from, to: range?.to })}
             disabled={isDateBooked}
+            modifiers={{
+              booked: isDateBooked
+            }}
+            modifiersClassNames={{
+              booked: "bg-red-500 text-white hover:bg-red-600"
+            }}
             className="rounded-md border"
           />
         </CardContent>
