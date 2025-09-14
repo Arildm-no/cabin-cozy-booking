@@ -41,7 +41,13 @@ export const BookingForm = ({ selectedDates, onBookingSuccess }: BookingFormProp
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Form submission started');
+    console.log('Form data:', formData);
+    console.log('Selected dates:', selectedDates);
+    console.log('Form valid?', isFormValid());
+    
     if (!isFormValid()) {
+      console.log('Form validation failed');
       toast({
         title: "Invalid Form",
         description: "Please fill in all required fields correctly.",
@@ -53,20 +59,29 @@ export const BookingForm = ({ selectedDates, onBookingSuccess }: BookingFormProp
     setLoading(true);
 
     try {
+      console.log('Starting database insert');
+      const insertData = {
+        user_name: formData.user_name.trim(),
+        user_email: formData.user_email.trim(),
+        user_phone: formData.user_phone.trim(),
+        start_date: format(selectedDates.from!, 'yyyy-MM-dd'),
+        end_date: format(selectedDates.to!, 'yyyy-MM-dd'),
+        guests_count: parseInt(formData.guests_count),
+        notes: formData.notes.trim() || null,
+        status: 'pending'
+      };
+      console.log('Insert data:', insertData);
+      
       const { error } = await supabase
         .from('bookings')
-        .insert({
-          user_name: formData.user_name.trim(),
-          user_email: formData.user_email.trim(),
-          user_phone: formData.user_phone.trim(),
-          start_date: format(selectedDates.from!, 'yyyy-MM-dd'),
-          end_date: format(selectedDates.to!, 'yyyy-MM-dd'),
-          guests_count: parseInt(formData.guests_count),
-          notes: formData.notes.trim() || null,
-          status: 'pending'
-        });
+        .insert(insertData);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+      
+      console.log('Database insert successful');
 
       toast({
         title: "Booking Submitted!",
@@ -85,6 +100,12 @@ export const BookingForm = ({ selectedDates, onBookingSuccess }: BookingFormProp
       onBookingSuccess();
     } catch (error: any) {
       console.error('Error creating booking:', error);
+      console.error('Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
       toast({
         title: "Booking Failed",
         description: error.message || "There was an error submitting your booking.",
