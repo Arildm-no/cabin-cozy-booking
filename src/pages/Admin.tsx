@@ -604,34 +604,35 @@ const Admin = () => {
                   <div className="space-y-4">
                     {pendingBookings.map((booking) => (
                       <div key={booking.id} className="border rounded-lg p-4 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h3 className="font-semibold text-lg">{booking.user_name}</h3>
-                            <p className="text-sm text-muted-foreground">{booking.user_email}</p>
-                            <p className="text-sm text-muted-foreground">{booking.user_phone}</p>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-lg break-words">{booking.user_name}</h3>
+                            <p className="text-sm text-muted-foreground break-all">{booking.user_email}</p>
+                            <p className="text-sm text-muted-foreground break-all">{booking.user_phone}</p>
                           </div>
-                          <Badge variant="secondary">{booking.guests_count} guests</Badge>
+                          <Badge variant="secondary" className="shrink-0">{booking.guests_count} guests</Badge>
                         </div>
                         
                         <div className="bg-muted/50 p-3 rounded">
-                          <p className="font-medium">
+                          <p className="font-medium break-words">
                             {format(parseISO(booking.start_date), 'MMM d, yyyy')} - {format(parseISO(booking.end_date), 'MMM d, yyyy')}
                           </p>
                           {booking.notes && (
-                            <p className="text-sm text-muted-foreground mt-1">
+                            <p className="text-sm text-muted-foreground mt-1 break-words whitespace-pre-wrap">
                               Notes: {booking.notes}
                             </p>
                           )}
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <p className="text-xs text-muted-foreground mt-1 break-words">
                             Requested: {format(parseISO(booking.created_at), 'MMM d, yyyy HH:mm')}
                           </p>
                         </div>
                         
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                           <Button 
                             onClick={() => handleBookingAction(booking.id, 'approved')}
                             variant="default"
                             size="sm"
+                            className="w-full sm:w-auto"
                           >
                             Accept
                           </Button>
@@ -639,6 +640,7 @@ const Admin = () => {
                             onClick={() => handleBookingAction(booking.id, 'rejected')}
                             variant="destructive"
                             size="sm"
+                            className="w-full sm:w-auto"
                           >
                             Decline
                           </Button>
@@ -663,25 +665,25 @@ const Admin = () => {
                   <div className="space-y-4">
                     {approvedBookings.map((booking) => (
                       <div key={booking.id} className="border rounded-lg p-4 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h3 className="font-semibold text-lg">{booking.user_name}</h3>
-                            <p className="text-sm text-muted-foreground">{booking.user_email}</p>
-                            <p className="text-sm text-muted-foreground">{booking.user_phone}</p>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-lg break-words">{booking.user_name}</h3>
+                            <p className="text-sm text-muted-foreground break-all">{booking.user_email}</p>
+                            <p className="text-sm text-muted-foreground break-all">{booking.user_phone}</p>
                           </div>
-                          <Badge variant="default">{booking.guests_count} guests</Badge>
+                          <Badge variant="default" className="shrink-0">{booking.guests_count} guests</Badge>
                         </div>
                         
                         <div className="bg-muted/50 p-3 rounded">
-                          <p className="font-medium">
+                          <p className="font-medium break-words">
                             {format(parseISO(booking.start_date), 'MMM d, yyyy')} - {format(parseISO(booking.end_date), 'MMM d, yyyy')}
                           </p>
                           {booking.notes && (
-                            <p className="text-sm text-muted-foreground mt-1">
+                            <p className="text-sm text-muted-foreground mt-1 break-words whitespace-pre-wrap">
                               Notes: {booking.notes}
                             </p>
                           )}
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <p className="text-xs text-muted-foreground mt-1 break-words">
                             Approved: {format(parseISO(booking.created_at), 'MMM d, yyyy HH:mm')}
                           </p>
                         </div>
@@ -822,20 +824,20 @@ const Admin = () => {
                           </div>
                         </div>
                       ) : (
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-2">
                               <Badge variant="outline">{info.category}</Badge>
                               <Badge variant="secondary">{info.icon}</Badge>
                             </div>
-                            <h3 className="font-semibold mb-2">{info.title}</h3>
-                            <p className="text-sm text-muted-foreground whitespace-pre-line">{info.content}</p>
+                            <h3 className="font-semibold mb-2 break-words">{info.title}</h3>
+                            <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words">{info.content}</p>
                           </div>
-                          <div className="flex gap-2 ml-4">
-                            <Button onClick={() => setEditingInfo(info)} variant="outline" size="sm">
+                          <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+                            <Button onClick={() => setEditingInfo(info)} variant="outline" size="sm" className="w-full sm:w-auto">
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button onClick={() => handleDeleteCabinInfo(info.id)} variant="destructive" size="sm">
+                            <Button onClick={() => handleDeleteCabinInfo(info.id)} variant="destructive" size="sm" className="w-full sm:w-auto">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
