@@ -583,7 +583,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="bookings" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="w-full flex flex-wrap justify-center gap-2 md:grid md:grid-cols-6 md:gap-0">
             <TabsTrigger value="bookings">Pending Bookings</TabsTrigger>
             <TabsTrigger value="approved-bookings">Approved Bookings</TabsTrigger>
             <TabsTrigger value="cabin-info">Cabin Information</TabsTrigger>
