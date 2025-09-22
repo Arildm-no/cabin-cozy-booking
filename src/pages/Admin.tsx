@@ -583,13 +583,13 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="bookings" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="bookings">Pending Bookings</TabsTrigger>
-            <TabsTrigger value="approved-bookings">Approved Bookings</TabsTrigger>
-            <TabsTrigger value="cabin-info">Cabin Information</TabsTrigger>
-            <TabsTrigger value="supplies">Supplies</TabsTrigger>
-            <TabsTrigger value="projects">Projects</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1">
+            <TabsTrigger value="bookings" className="text-xs sm:text-sm whitespace-normal break-words hyphens-auto p-2">Pending Bookings</TabsTrigger>
+            <TabsTrigger value="approved-bookings" className="text-xs sm:text-sm whitespace-normal break-words hyphens-auto p-2">Approved Bookings</TabsTrigger>
+            <TabsTrigger value="cabin-info" className="text-xs sm:text-sm whitespace-normal break-words hyphens-auto p-2">Cabin Information</TabsTrigger>
+            <TabsTrigger value="supplies" className="text-xs sm:text-sm whitespace-normal break-words hyphens-auto p-2">Supplies</TabsTrigger>
+            <TabsTrigger value="projects" className="text-xs sm:text-sm whitespace-normal break-words hyphens-auto p-2">Projects</TabsTrigger>
+            <TabsTrigger value="users" className="text-xs sm:text-sm whitespace-normal break-words hyphens-auto p-2">Users</TabsTrigger>
           </TabsList>
           
           <TabsContent value="bookings">
