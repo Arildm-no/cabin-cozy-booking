@@ -583,14 +583,16 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="bookings" className="w-full">
-          <TabsList className="w-full flex flex-wrap justify-center gap-2 md:grid md:grid-cols-6 md:gap-0">
-            <TabsTrigger value="bookings">Pending Bookings</TabsTrigger>
-            <TabsTrigger value="approved-bookings">Approved Bookings</TabsTrigger>
-            <TabsTrigger value="cabin-info">Cabin Information</TabsTrigger>
-            <TabsTrigger value="supplies">Supplies</TabsTrigger>
-            <TabsTrigger value="projects">Projects</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
-          </TabsList>
+          <div className="w-full bg-muted/50 p-2 rounded-lg mb-4">
+            <TabsList className="w-full bg-transparent grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2 h-auto p-0">
+              <TabsTrigger value="bookings" className="w-full">Pending Bookings</TabsTrigger>
+              <TabsTrigger value="approved-bookings" className="w-full">Approved Bookings</TabsTrigger>
+              <TabsTrigger value="cabin-info" className="w-full">Cabin Information</TabsTrigger>
+              <TabsTrigger value="supplies" className="w-full">Supplies</TabsTrigger>
+              <TabsTrigger value="projects" className="w-full">Projects</TabsTrigger>
+              <TabsTrigger value="users" className="w-full">Users</TabsTrigger>
+            </TabsList>
+          </div>
           
           <TabsContent value="bookings">
             <Card>
