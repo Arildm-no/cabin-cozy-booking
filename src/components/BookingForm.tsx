@@ -128,11 +128,13 @@ export const BookingForm = ({ selectedDates, selectedCabin, onBookingSuccess }: 
     );
   }
 
+  const isGardbo = selectedCabin === 'Gårdbo';
+
   return (
-    <Card className={selectedCabin === 'Gårdbo' ? 'bg-teal-50/50 border-teal-200' : ''}>
+    <Card className={isGardbo ? 'border-[#80DEEA]' : ''} style={isGardbo ? { backgroundColor: '#E0F7FA' } : {}}>
       <CardHeader>
-        <CardTitle>Book Your Stay - {selectedCabin}</CardTitle>
-        <p className="text-sm text-muted-foreground">
+        <CardTitle className={isGardbo ? 'text-[#004D40]' : ''}>Book Your Stay - {selectedCabin}</CardTitle>
+        <p className={`text-sm ${isGardbo ? 'text-[#004D40]/70' : 'text-muted-foreground'}`}>
           {format(selectedDates.from, 'MMM d')} - {format(selectedDates.to, 'MMM d, yyyy')}
         </p>
       </CardHeader>

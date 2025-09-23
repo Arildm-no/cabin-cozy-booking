@@ -71,13 +71,13 @@ export const BookingCalendar = ({ onDateSelect, selectedDates, selectedCabin }: 
     return <div className="flex justify-center p-8">Loading calendar...</div>;
   }
 
-  const calendarBg = selectedCabin === 'Gårdbo' ? 'bg-teal-50' : 'bg-background';
+  const isGardbo = selectedCabin === 'Gårdbo';
 
   return (
     <div className="space-y-6">
-      <Card className={selectedCabin === 'Gårdbo' ? 'bg-teal-50/50 border-teal-200' : ''}>
+      <Card className={isGardbo ? 'border-[#80DEEA]' : ''} style={isGardbo ? { backgroundColor: '#E0F7FA' } : {}}>
         <CardHeader>
-          <CardTitle>Select Your Dates - {selectedCabin}</CardTitle>
+          <CardTitle className={isGardbo ? 'text-[#004D40]' : ''}>Select Your Dates - {selectedCabin}</CardTitle>
         </CardHeader>
         <CardContent>
           <Calendar
@@ -92,29 +92,51 @@ export const BookingCalendar = ({ onDateSelect, selectedDates, selectedCabin }: 
             modifiersClassNames={{
               booked: "bg-red-500 text-white hover:bg-red-600"
             }}
-            className={`rounded-md border ${calendarBg}`}
+            className={`rounded-md border ${isGardbo ? 'border-[#80DEEA]' : ''}`}
+            style={isGardbo ? {
+              backgroundColor: '#E0F7FA',
+              color: '#004D40'
+            } : {}}
+            modifiersStyles={isGardbo ? {
+              selected: {
+                backgroundColor: '#26C6DA',
+                color: 'white'
+              },
+              range_start: {
+                backgroundColor: '#26C6DA',
+                color: 'white'
+              },
+              range_end: {
+                backgroundColor: '#26C6DA', 
+                color: 'white'
+              },
+              range_middle: {
+                backgroundColor: '#80DEEA',
+                color: '#004D40'
+              }
+            } : {}}
           />
         </CardContent>
       </Card>
 
-      <Card className={selectedCabin === 'Gårdbo' ? 'bg-teal-50/50 border-teal-200' : ''}>
+      <Card className={isGardbo ? 'border-[#80DEEA]' : ''} style={isGardbo ? { backgroundColor: '#E0F7FA' } : {}}>
         <CardHeader>
-          <CardTitle>Current Bookings - {selectedCabin}</CardTitle>
+          <CardTitle className={isGardbo ? 'text-[#004D40]' : ''}>Current Bookings - {selectedCabin}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {bookings.length === 0 ? (
-              <p className="text-muted-foreground">No current bookings</p>
+              <p className={`${isGardbo ? 'text-[#004D40]' : 'text-muted-foreground'}`}>No current bookings</p>
             ) : (
               bookings.map((booking) => (
-                <div key={booking.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div key={booking.id} className={`flex items-center justify-between p-3 border rounded-lg ${isGardbo ? 'border-[#80DEEA] bg-white/50' : ''}`}>
                   <div className="flex-1">
-                    <p className="font-medium">{booking.user_name}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className={`font-medium ${isGardbo ? 'text-[#004D40]' : ''}`}>{booking.user_name}</p>
+                    <p className={`text-sm ${isGardbo ? 'text-[#004D40]/70' : 'text-muted-foreground'}`}>
                       {format(parseISO(booking.start_date), 'MMM d')} - {format(parseISO(booking.end_date), 'MMM d, yyyy')}
                     </p>
                     {booking.notes && (
-                      <p className="text-sm text-muted-foreground mt-1 italic">
+                      <p className={`text-sm mt-1 italic ${isGardbo ? 'text-[#004D40]/70' : 'text-muted-foreground'}`}>
                         Note: {booking.notes}
                       </p>
                     )}
