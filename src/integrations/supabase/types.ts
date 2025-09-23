@@ -34,6 +34,7 @@ export type Database = {
       }
       bookings: {
         Row: {
+          cabin_name: string
           created_at: string
           end_date: string
           guests_count: number
@@ -47,6 +48,7 @@ export type Database = {
           user_phone: string
         }
         Insert: {
+          cabin_name?: string
           created_at?: string
           end_date: string
           guests_count: number
@@ -60,6 +62,7 @@ export type Database = {
           user_phone: string
         }
         Update: {
+          cabin_name?: string
           created_at?: string
           end_date?: string
           guests_count?: number

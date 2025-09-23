@@ -4,7 +4,9 @@ import { BookingForm } from '@/components/BookingForm';
 import { CabinInfo } from '@/components/CabinInfo';
 import SuppliesList from '@/components/SuppliesList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { Link } from 'react-router-dom';
 import { LoginForm } from '@/components/LoginForm';
 import { useAuth } from '@/hooks/useAuth';
@@ -16,6 +18,7 @@ const Index = () => {
     from: undefined,
     to: undefined
   });
+  const [selectedCabin, setSelectedCabin] = useState('Cozy');
   const [refreshCalendar, setRefreshCalendar] = useState(0);
 
   const handleBookingSuccess = () => {
@@ -55,14 +58,28 @@ const Index = () => {
           </TabsList>
 
           <TabsContent value="booking">
+            <div className="mb-6">
+              <Label htmlFor="cabin-select" className="text-base font-medium">Select Cabin</Label>
+              <Select value={selectedCabin} onValueChange={setSelectedCabin}>
+                <SelectTrigger className="w-full max-w-xs mt-2">
+                  <SelectValue placeholder="Choose a cabin" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Cozy">Cozy</SelectItem>
+                  <SelectItem value="Gårdbo">Gårdbo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <BookingCalendar 
-                key={refreshCalendar}
+                key={`${refreshCalendar}-${selectedCabin}`}
                 onDateSelect={setSelectedDates} 
-                selectedDates={selectedDates} 
+                selectedDates={selectedDates}
+                selectedCabin={selectedCabin}
               />
               <BookingForm 
                 selectedDates={selectedDates} 
+                selectedCabin={selectedCabin}
                 onBookingSuccess={handleBookingSuccess}
               />
             </div>

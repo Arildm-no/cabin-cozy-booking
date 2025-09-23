@@ -11,10 +11,11 @@ import { format } from 'date-fns';
 
 interface BookingFormProps {
   selectedDates: { from: Date | undefined; to: Date | undefined };
+  selectedCabin: string;
   onBookingSuccess: () => void;
 }
 
-export const BookingForm = ({ selectedDates, onBookingSuccess }: BookingFormProps) => {
+export const BookingForm = ({ selectedDates, selectedCabin, onBookingSuccess }: BookingFormProps) => {
   const [formData, setFormData] = useState({
     user_name: '',
     user_email: '',
@@ -67,6 +68,7 @@ export const BookingForm = ({ selectedDates, onBookingSuccess }: BookingFormProp
         start_date: format(selectedDates.from!, 'yyyy-MM-dd'),
         end_date: format(selectedDates.to!, 'yyyy-MM-dd'),
         guests_count: parseInt(formData.guests_count),
+        cabin_name: selectedCabin,
         notes: formData.notes.trim() || null,
         status: 'pending'
       };
@@ -127,9 +129,9 @@ export const BookingForm = ({ selectedDates, onBookingSuccess }: BookingFormProp
   }
 
   return (
-    <Card>
+    <Card className={selectedCabin === 'Gårdbo' ? 'bg-teal-50/50 border-teal-200' : ''}>
       <CardHeader>
-        <CardTitle>Book Your Stay</CardTitle>
+        <CardTitle>Book Your Stay - {selectedCabin}</CardTitle>
         <p className="text-sm text-muted-foreground">
           {format(selectedDates.from, 'MMM d')} - {format(selectedDates.to, 'MMM d, yyyy')}
         </p>

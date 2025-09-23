@@ -22,15 +22,16 @@ interface Booking {
 interface BookingCalendarProps {
   onDateSelect: (dates: { from: Date | undefined; to: Date | undefined }) => void;
   selectedDates: { from: Date | undefined; to: Date | undefined };
+  selectedCabin: string;
 }
 
-export const BookingCalendar = ({ onDateSelect, selectedDates }: BookingCalendarProps) => {
+export const BookingCalendar = ({ onDateSelect, selectedDates, selectedCabin }: BookingCalendarProps) => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchBookings();
-  }, []);
+  }, [selectedCabin]);
 
   const fetchBookings = async () => {
     try {
@@ -38,6 +39,7 @@ export const BookingCalendar = ({ onDateSelect, selectedDates }: BookingCalendar
         .from('bookings')
         .select('*')
         .eq('status', 'approved')
+        .eq('cabin_name', selectedCabin)
         .order('start_date', { ascending: true });
 
       if (error) throw error;
@@ -69,11 +71,13 @@ export const BookingCalendar = ({ onDateSelect, selectedDates }: BookingCalendar
     return <div className="flex justify-center p-8">Loading calendar...</div>;
   }
 
+  const calendarBg = selectedCabin === 'Gårdbo' ? 'bg-teal-50' : 'bg-background';
+
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className={selectedCabin === 'Gårdbo' ? 'bg-teal-50/50 border-teal-200' : ''}>
         <CardHeader>
-          <CardTitle>Select Your Dates</CardTitle>
+          <CardTitle>Select Your Dates - {selectedCabin}</CardTitle>
         </CardHeader>
         <CardContent>
           <Calendar
@@ -88,14 +92,14 @@ export const BookingCalendar = ({ onDateSelect, selectedDates }: BookingCalendar
             modifiersClassNames={{
               booked: "bg-red-500 text-white hover:bg-red-600"
             }}
-            className="rounded-md border"
+            className={`rounded-md border ${calendarBg}`}
           />
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className={selectedCabin === 'Gårdbo' ? 'bg-teal-50/50 border-teal-200' : ''}>
         <CardHeader>
-          <CardTitle>Current Bookings</CardTitle>
+          <CardTitle>Current Bookings - {selectedCabin}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
