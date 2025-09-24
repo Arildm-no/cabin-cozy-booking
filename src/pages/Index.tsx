@@ -18,7 +18,7 @@ const Index = () => {
     from: undefined,
     to: undefined
   });
-  const [selectedCabin, setSelectedCabin] = useState('Cozy');
+  const [selectedCabin, setSelectedCabin] = useState('Blefjell');
   const [refreshCalendar, setRefreshCalendar] = useState(0);
 
   const handleBookingSuccess = () => {
@@ -65,7 +65,7 @@ const Index = () => {
                   <SelectValue placeholder="Choose a cabin" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Cozy">Cozy</SelectItem>
+                  <SelectItem value="Blefjell">Blefjell</SelectItem>
                   <SelectItem value="Gårdbo">Gårdbo</SelectItem>
                 </SelectContent>
               </Select>
