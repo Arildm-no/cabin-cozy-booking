@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, ShoppingCart } from 'lucide-react';
+import { useLocation } from '@/contexts/LocationContext';
 
 interface Supply {
   id: string;
@@ -15,16 +16,18 @@ interface Supply {
 const SuppliesList = () => {
   const [supplies, setSupplies] = useState<Supply[]>([]);
   const [loading, setLoading] = useState(true);
+  const { selectedLocation } = useLocation();
 
   useEffect(() => {
     fetchSupplies();
-  }, []);
+  }, [selectedLocation]);
 
   const fetchSupplies = async () => {
     try {
       const { data, error } = await supabase
         .from('supplies' as any)
         .select('*')
+        .eq('location', selectedLocation)
         .order('is_urgent', { ascending: false })
         .order('created_at', { ascending: true });
 

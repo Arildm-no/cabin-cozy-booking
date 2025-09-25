@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MapPin, Key, Droplets, Utensils, Bed, Coffee } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useLocation } from '@/contexts/LocationContext';
 
 interface CabinInfo {
   id: string;
@@ -23,16 +24,18 @@ const iconMap = {
 export const CabinInfo = () => {
   const [cabinInfo, setCabinInfo] = useState<CabinInfo[]>([]);
   const [loading, setLoading] = useState(true);
+  const { selectedLocation } = useLocation();
 
   useEffect(() => {
     fetchCabinInfo();
-  }, []);
+  }, [selectedLocation]);
 
   const fetchCabinInfo = async () => {
     try {
       const { data, error } = await supabase
         .from('cabin_info')
         .select('*')
+        .eq('location', selectedLocation)
         .order('category');
 
       if (error) throw error;

@@ -15,6 +15,8 @@ import { Plus, Edit, Trash2, ShoppingCart, AlertTriangle, LogOut } from 'lucide-
 import { Link } from 'react-router-dom';
 import ProjectsForm from '@/components/ProjectsForm';
 import ProjectsList from '@/components/ProjectsList';
+import LocationSelector from '@/components/LocationSelector';
+import { useLocation } from '@/contexts/LocationContext';
 
 interface Booking {
   id: string;
@@ -55,6 +57,7 @@ interface User {
 
 const Admin = () => {
   const { isAuthenticated, logout } = useAuth();
+  const { selectedLocation } = useLocation();
   const [pendingBookings, setPendingBookings] = useState<Booking[]>([]);
   const [approvedBookings, setApprovedBookings] = useState<Booking[]>([]);
   const [cabinInfo, setCabinInfo] = useState<CabinInfo[]>([]);
@@ -78,7 +81,7 @@ const Admin = () => {
     if (isAuthenticated) {
       Promise.all([fetchPendingBookings(), fetchApprovedBookings(), fetchCabinInfo(), fetchSupplies(), fetchUsers()]);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, selectedLocation]);
 
   const fetchPendingBookings = async () => {
     try {
@@ -127,6 +130,7 @@ const Admin = () => {
       const { data, error } = await supabase
         .from('cabin_info')
         .select('*')
+        .eq('location', selectedLocation)
         .order('category');
 
       if (error) throw error;
@@ -146,6 +150,7 @@ const Admin = () => {
       const { data, error } = await supabase
         .from('supplies' as any)
         .select('*')
+        .eq('location', selectedLocation)
         .order('is_urgent', { ascending: false })
         .order('created_at', { ascending: true });
 
@@ -277,7 +282,7 @@ const Admin = () => {
     try {
       const { error } = await supabase
         .from('cabin_info')
-        .insert([newInfo]);
+        .insert([{ ...newInfo, location: selectedLocation }]);
 
       if (error) throw error;
 
@@ -337,7 +342,7 @@ const Admin = () => {
     try {
       const { error } = await supabase
         .from('supplies' as any)
-        .insert([newSupply]);
+        .insert([{ ...newSupply, location: selectedLocation }]);
 
       if (error) throw error;
 
@@ -569,7 +574,11 @@ const Admin = () => {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-8 px-4">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Admin Panel</h1>
+          <div className="flex justify-between items-center mb-4">
+            <div></div>
+            <h1 className="text-4xl font-bold">Admin Panel</h1>
+            <LocationSelector />
+          </div>
           <p className="text-xl text-muted-foreground">Manage bookings and cabin information</p>
           <div className="mt-4 flex gap-2 justify-center">
             <Link to="/">

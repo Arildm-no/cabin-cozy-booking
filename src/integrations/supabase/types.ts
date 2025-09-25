@@ -84,6 +84,7 @@ export type Database = {
           created_at: string
           icon: string
           id: string
+          location: string
           title: string
           updated_at: string
         }
@@ -93,6 +94,7 @@ export type Database = {
           created_at?: string
           icon?: string
           id?: string
+          location?: string
           title: string
           updated_at?: string
         }
@@ -102,6 +104,7 @@ export type Database = {
           created_at?: string
           icon?: string
           id?: string
+          location?: string
           title?: string
           updated_at?: string
         }
@@ -149,6 +152,7 @@ export type Database = {
           id: string
           is_urgent: boolean
           item_name: string
+          location: string
           notes: string | null
           updated_at: string
         }
@@ -157,6 +161,7 @@ export type Database = {
           id?: string
           is_urgent?: boolean
           item_name: string
+          location?: string
           notes?: string | null
           updated_at?: string
         }
@@ -165,6 +170,7 @@ export type Database = {
           id?: string
           is_urgent?: boolean
           item_name?: string
+          location?: string
           notes?: string | null
           updated_at?: string
         }

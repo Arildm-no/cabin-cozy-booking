@@ -3,6 +3,7 @@ import { BookingCalendar } from '@/components/BookingCalendar';
 import { BookingForm } from '@/components/BookingForm';
 import { CabinInfo } from '@/components/CabinInfo';
 import SuppliesList from '@/components/SuppliesList';
+import LocationSelector from '@/components/LocationSelector';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -34,7 +35,11 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-8 px-4">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Family Cabin Booking</h1>
+          <div className="flex justify-between items-center mb-4">
+            <div></div>
+            <h1 className="text-4xl font-bold">Family Cabin Booking</h1>
+            <LocationSelector />
+          </div>
           <p className="text-xl text-muted-foreground">Book your perfect cabin getaway</p>
           <div className="mt-4 flex gap-2 justify-center">
             <Link to="/admin">
