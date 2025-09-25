@@ -19,7 +19,6 @@ const Index = () => {
     from: undefined,
     to: undefined
   });
-  const [selectedCabin, setSelectedCabin] = useState('Blefjell');
   const [refreshCalendar, setRefreshCalendar] = useState(0);
 
   const handleBookingSuccess = () => {
@@ -63,28 +62,14 @@ const Index = () => {
           </TabsList>
 
           <TabsContent value="booking">
-            <div className="mb-6">
-              <Label htmlFor="cabin-select" className="text-base font-medium">Select Cabin</Label>
-              <Select value={selectedCabin} onValueChange={setSelectedCabin}>
-                <SelectTrigger className="w-full max-w-xs mt-2">
-                  <SelectValue placeholder="Choose a cabin" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Blefjell">Blefjell</SelectItem>
-                  <SelectItem value="Gårdbo">Gårdbo</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <BookingCalendar 
-                key={`${refreshCalendar}-${selectedCabin}`}
+                key={refreshCalendar}
                 onDateSelect={setSelectedDates} 
                 selectedDates={selectedDates}
-                selectedCabin={selectedCabin}
               />
               <BookingForm 
                 selectedDates={selectedDates} 
-                selectedCabin={selectedCabin}
                 onBookingSuccess={handleBookingSuccess}
               />
             </div>

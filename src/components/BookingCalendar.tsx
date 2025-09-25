@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { format, parseISO, isWithinInterval } from 'date-fns';
+import { useLocation } from '@/contexts/LocationContext';
 
 interface Booking {
   id: string;
@@ -22,16 +23,16 @@ interface Booking {
 interface BookingCalendarProps {
   onDateSelect: (dates: { from: Date | undefined; to: Date | undefined }) => void;
   selectedDates: { from: Date | undefined; to: Date | undefined };
-  selectedCabin: string;
 }
 
-export const BookingCalendar = ({ onDateSelect, selectedDates, selectedCabin }: BookingCalendarProps) => {
+export const BookingCalendar = ({ onDateSelect, selectedDates }: BookingCalendarProps) => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const { selectedLocation } = useLocation();
 
   useEffect(() => {
     fetchBookings();
-  }, [selectedCabin]);
+  }, [selectedLocation]);
 
   const fetchBookings = async () => {
     try {
@@ -39,7 +40,7 @@ export const BookingCalendar = ({ onDateSelect, selectedDates, selectedCabin }: 
         .from('bookings')
         .select('*')
         .eq('status', 'approved')
-        .eq('cabin_name', selectedCabin)
+        .eq('cabin_name', selectedLocation)
         .order('start_date', { ascending: true });
 
       if (error) throw error;
@@ -71,13 +72,13 @@ export const BookingCalendar = ({ onDateSelect, selectedDates, selectedCabin }: 
     return <div className="flex justify-center p-8">Loading calendar...</div>;
   }
 
-  const isGardbo = selectedCabin === 'Gårdbo';
+  const isGardbo = selectedLocation === 'Gårdbo';
 
   return (
     <div className="space-y-6">
       <Card className={isGardbo ? 'border-[#80DEEA]' : ''} style={isGardbo ? { backgroundColor: '#E0F7FA' } : {}}>
         <CardHeader>
-          <CardTitle className={isGardbo ? 'text-[#004D40]' : ''}>Select Your Dates - {selectedCabin}</CardTitle>
+          <CardTitle className={isGardbo ? 'text-[#004D40]' : ''}>Select Your Dates - {selectedLocation}</CardTitle>
         </CardHeader>
         <CardContent>
           <Calendar
@@ -121,7 +122,7 @@ export const BookingCalendar = ({ onDateSelect, selectedDates, selectedCabin }: 
 
       <Card className={isGardbo ? 'border-[#80DEEA]' : ''} style={isGardbo ? { backgroundColor: '#E0F7FA' } : {}}>
         <CardHeader>
-          <CardTitle className={isGardbo ? 'text-[#004D40]' : ''}>Current Bookings - {selectedCabin}</CardTitle>
+          <CardTitle className={isGardbo ? 'text-[#004D40]' : ''}>Current Bookings - {selectedLocation}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
