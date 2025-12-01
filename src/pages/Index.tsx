@@ -1,20 +1,26 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { BookingCalendar } from '@/components/BookingCalendar';
 import { BookingForm } from '@/components/BookingForm';
 import { CabinInfo } from '@/components/CabinInfo';
 import SuppliesList from '@/components/SuppliesList';
 import LocationSelector from '@/components/LocationSelector';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Link } from 'react-router-dom';
 import { LoginForm } from '@/components/LoginForm';
 import { useAuth } from '@/hooks/useAuth';
+import { useLocation } from '@/contexts/LocationContext';
+import { useSeason } from '@/hooks/useSeason';
 import { LogOut } from 'lucide-react';
+import blefjellSummer from '@/assets/blefjell-summer.jpg';
+import blefjellWinter from '@/assets/blefjell-winter.jpg';
+import gardboSummer from '@/assets/gardbo-summer.jpg';
+import gardboWinter from '@/assets/gardbo-winter.jpg';
 
 const Index = () => {
   const { isAuthenticated, logout } = useAuth();
+  const { selectedLocation } = useLocation();
+  const season = useSeason();
   const [selectedDates, setSelectedDates] = useState<{ from: Date | undefined; to: Date | undefined }>({
     from: undefined,
     to: undefined
@@ -26,13 +32,31 @@ const Index = () => {
     setRefreshCalendar(prev => prev + 1);
   };
 
+  // Determine background image based on location and season
+  const backgroundImage = useMemo(() => {
+    if (selectedLocation === 'Blefjell') {
+      return season === 'summer' ? blefjellSummer : blefjellWinter;
+    } else {
+      return season === 'summer' ? gardboSummer : gardboWinter;
+    }
+  }, [selectedLocation, season]);
+
   if (!isAuthenticated) {
     return <LoginForm />;
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-8 px-4">
+    <div className="min-h-screen relative">
+      {/* Background Image */}
+      <div 
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat transition-all duration-700"
+        style={{ backgroundImage: `url(${backgroundImage})` }}
+      >
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+      </div>
+      
+      {/* Content */}
+      <div className="relative z-10 container mx-auto py-8 px-4">
         <div className="text-center mb-8">
           <div className="flex justify-between items-center mb-4">
             <div></div>
