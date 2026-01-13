@@ -111,7 +111,7 @@ const Admin = () => {
         .from('bookings')
         .select('*')
         .eq('status', 'approved')
-        .order('start_date', { ascending: true });
+        .order('start_date', { ascending: false });
 
       if (error) throw error;
       setApprovedBookings(data || []);
