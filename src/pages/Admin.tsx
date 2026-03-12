@@ -85,13 +85,7 @@ const Admin = () => {
 
   const fetchPendingBookings = async () => {
     try {
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('*')
-        .eq('status', 'pending')
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
+      const data = await adminApi('get_pending_bookings');
       setPendingBookings(data || []);
     } catch (error) {
       console.error('Error fetching pending bookings:', error);
