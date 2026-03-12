@@ -101,13 +101,7 @@ const Admin = () => {
 
   const fetchApprovedBookings = async () => {
     try {
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('*')
-        .eq('status', 'approved')
-        .order('start_date', { ascending: false });
-
-      if (error) throw error;
+      const data = await adminApi('get_approved_bookings');
       setApprovedBookings(data || []);
     } catch (error) {
       console.error('Error fetching approved bookings:', error);
