@@ -170,12 +170,7 @@ const Admin = () => {
 
   const handleBookingAction = async (bookingId: string, action: 'approved' | 'rejected') => {
     try {
-      const { error } = await supabase
-        .from('bookings')
-        .update({ status: action })
-        .eq('id', bookingId);
-
-      if (error) throw error;
+      await adminApi('update_booking_status', { booking_id: bookingId, status: action });
 
       setPendingBookings(prev => prev.filter(booking => booking.id !== bookingId));
       if (action === 'approved') {
