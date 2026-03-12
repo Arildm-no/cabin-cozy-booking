@@ -328,16 +328,14 @@ const Admin = () => {
 
   const handleSaveSupply = async (supply: Supply) => {
     try {
-      const { error } = await supabase
-        .from('supplies' as any)
-        .update({
+      await adminApi('update_supply', {
+        supply_id: supply.id,
+        supply: {
           item_name: supply.item_name,
           notes: supply.notes,
           is_urgent: supply.is_urgent
-        })
-        .eq('id', supply.id);
-
-      if (error) throw error;
+        }
+      });
 
       await fetchSupplies();
       setEditingSupply(null);
