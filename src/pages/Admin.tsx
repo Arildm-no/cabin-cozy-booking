@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { adminApi } from '@/lib/adminApi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -85,13 +86,7 @@ const Admin = () => {
 
   const fetchPendingBookings = async () => {
     try {
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('*')
-        .eq('status', 'pending')
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
+      const data = await adminApi('get_pending_bookings');
       setPendingBookings(data || []);
     } catch (error) {
       console.error('Error fetching pending bookings:', error);
@@ -107,13 +102,7 @@ const Admin = () => {
 
   const fetchApprovedBookings = async () => {
     try {
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('*')
-        .eq('status', 'approved')
-        .order('start_date', { ascending: false });
-
-      if (error) throw error;
+      const data = await adminApi('get_approved_bookings');
       setApprovedBookings(data || []);
     } catch (error) {
       console.error('Error fetching approved bookings:', error);
@@ -168,12 +157,7 @@ const Admin = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .order('username');
-
-      if (error) throw error;
+      const data = await adminApi('get_users');
       setUsers(data || []);
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -187,12 +171,7 @@ const Admin = () => {
 
   const handleBookingAction = async (bookingId: string, action: 'approved' | 'rejected') => {
     try {
-      const { error } = await supabase
-        .from('bookings')
-        .update({ status: action })
-        .eq('id', bookingId);
-
-      if (error) throw error;
+      await adminApi('update_booking_status', { booking_id: bookingId, status: action });
 
       setPendingBookings(prev => prev.filter(booking => booking.id !== bookingId));
       if (action === 'approved') {
@@ -215,12 +194,7 @@ const Admin = () => {
 
   const handleDeleteApprovedBooking = async (bookingId: string) => {
     try {
-      const { error } = await supabase
-        .from('bookings')
-        .delete()
-        .eq('id', bookingId);
-
-      if (error) throw error;
+      await adminApi('delete_booking', { booking_id: bookingId });
 
       setApprovedBookings(prev => prev.filter(booking => booking.id !== bookingId));
       
@@ -240,17 +214,15 @@ const Admin = () => {
 
   const handleSaveCabinInfo = async (info: CabinInfo) => {
     try {
-      const { error } = await supabase
-        .from('cabin_info')
-        .update({
+      await adminApi('update_cabin_info', {
+        info_id: info.id,
+        info: {
           category: info.category,
           title: info.title,
           content: info.content,
           icon: info.icon
-        })
-        .eq('id', info.id);
-
-      if (error) throw error;
+        }
+      });
 
       await fetchCabinInfo();
       setEditingInfo(null);
@@ -280,11 +252,9 @@ const Admin = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from('cabin_info')
-        .insert([{ ...newInfo, location: selectedLocation }]);
-
-      if (error) throw error;
+      await adminApi('create_cabin_info', {
+        info: { ...newInfo, location: selectedLocation }
+      });
 
       await fetchCabinInfo();
       setIsCreatingNew(false);
@@ -306,12 +276,7 @@ const Admin = () => {
 
   const handleDeleteCabinInfo = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('cabin_info')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      await adminApi('delete_cabin_info', { info_id: id });
 
       await fetchCabinInfo();
       
@@ -340,11 +305,9 @@ const Admin = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from('supplies' as any)
-        .insert([{ ...newSupply, location: selectedLocation }]);
-
-      if (error) throw error;
+      await adminApi('create_supply', {
+        supply: { ...newSupply, location: selectedLocation }
+      });
 
       await fetchSupplies();
       setIsCreatingNewSupply(false);
@@ -366,16 +329,14 @@ const Admin = () => {
 
   const handleSaveSupply = async (supply: Supply) => {
     try {
-      const { error } = await supabase
-        .from('supplies' as any)
-        .update({
+      await adminApi('update_supply', {
+        supply_id: supply.id,
+        supply: {
           item_name: supply.item_name,
           notes: supply.notes,
           is_urgent: supply.is_urgent
-        })
-        .eq('id', supply.id);
-
-      if (error) throw error;
+        }
+      });
 
       await fetchSupplies();
       setEditingSupply(null);
@@ -396,12 +357,7 @@ const Admin = () => {
 
   const handleDeleteSupply = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('supplies' as any)
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      await adminApi('delete_supply', { supply_id: id });
 
       await fetchSupplies();
       
@@ -430,30 +386,10 @@ const Admin = () => {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .insert([{
-          username: newUser.username,
-          password_hash: newUser.password
-        }]);
-
-      if (error) {
-        console.error('Supabase error:', error);
-        if (error.code === '23505') {
-          toast({
-            title: "Error",
-            description: "Username already exists",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Error",
-            description: `Failed to create user: ${error.message}`,
-            variant: "destructive",
-          });
-        }
-        return;
-      }
+      await adminApi('create_user', {
+        new_username: newUser.username,
+        new_password: newUser.password
+      });
 
       await fetchUsers();
       setIsCreatingNewUser(false);
@@ -463,11 +399,11 @@ const Admin = () => {
         title: "Success",
         description: "User created successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating user:', error);
       toast({
         title: "Error",
-        description: "Failed to create user",
+        description: error.message?.includes('duplicate') ? "Username already exists" : "Failed to create user",
         variant: "destructive",
       });
     }
@@ -475,12 +411,7 @@ const Admin = () => {
 
   const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
-        .from('users')
-        .update({ is_active: !currentStatus })
-        .eq('id', userId);
-
-      if (error) throw error;
+      await adminApi('toggle_user_status', { user_id: userId, new_status: !currentStatus });
 
       await fetchUsers();
       
@@ -509,12 +440,10 @@ const Admin = () => {
     }
 
     try {
-      const { data, error } = await supabase.rpc('update_user_password', {
-        username_input: resetPasswordUser,
+      await adminApi('reset_password', {
+        target_username: resetPasswordUser,
         new_password: newPassword
       });
-
-      if (error) throw error;
 
       setResetPasswordUser(null);
       setNewPassword('');
@@ -535,12 +464,7 @@ const Admin = () => {
 
   const handleDeleteUser = async (userId: string) => {
     try {
-      const { error } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', userId);
-
-      if (error) throw error;
+      await adminApi('delete_user', { user_id: userId });
 
       await fetchUsers();
       
