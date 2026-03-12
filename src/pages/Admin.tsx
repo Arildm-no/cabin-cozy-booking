@@ -275,12 +275,7 @@ const Admin = () => {
 
   const handleDeleteCabinInfo = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('cabin_info')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      await adminApi('delete_cabin_info', { info_id: id });
 
       await fetchCabinInfo();
       
