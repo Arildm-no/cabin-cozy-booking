@@ -156,12 +156,7 @@ const Admin = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .order('username');
-
-      if (error) throw error;
+      const data = await adminApi('get_users');
       setUsers(data || []);
     } catch (error) {
       console.error('Error fetching users:', error);
