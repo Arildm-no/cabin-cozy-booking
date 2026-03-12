@@ -251,11 +251,9 @@ const Admin = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from('cabin_info')
-        .insert([{ ...newInfo, location: selectedLocation }]);
-
-      if (error) throw error;
+      await adminApi('create_cabin_info', {
+        info: { ...newInfo, location: selectedLocation }
+      });
 
       await fetchCabinInfo();
       setIsCreatingNew(false);
