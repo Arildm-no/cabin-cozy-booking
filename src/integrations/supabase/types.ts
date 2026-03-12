@@ -208,6 +208,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_user_with_hash: {
+        Args: { password_input: string; username_input: string }
+        Returns: boolean
+      }
       update_user_password: {
         Args: { new_password: string; username_input: string }
         Returns: boolean
