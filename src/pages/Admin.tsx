@@ -304,11 +304,9 @@ const Admin = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from('supplies' as any)
-        .insert([{ ...newSupply, location: selectedLocation }]);
-
-      if (error) throw error;
+      await adminApi('create_supply', {
+        supply: { ...newSupply, location: selectedLocation }
+      });
 
       await fetchSupplies();
       setIsCreatingNewSupply(false);
