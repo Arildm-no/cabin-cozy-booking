@@ -356,12 +356,7 @@ const Admin = () => {
 
   const handleDeleteSupply = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('supplies' as any)
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      await adminApi('delete_supply', { supply_id: id });
 
       await fetchSupplies();
       
