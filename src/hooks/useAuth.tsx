@@ -53,6 +53,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setCurrentUser(username);
         localStorage.setItem('blefjell-auth', 'true');
         localStorage.setItem('blefjell-username', username);
+        localStorage.setItem('blefjell-password', password);
         return true;
       }
       return false;
@@ -67,6 +68,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setCurrentUser(null);
     localStorage.removeItem('blefjell-auth');
     localStorage.removeItem('blefjell-username');
+    localStorage.removeItem('blefjell-password');
   };
 
   return (
