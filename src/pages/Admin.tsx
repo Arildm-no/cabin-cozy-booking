@@ -213,17 +213,15 @@ const Admin = () => {
 
   const handleSaveCabinInfo = async (info: CabinInfo) => {
     try {
-      const { error } = await supabase
-        .from('cabin_info')
-        .update({
+      await adminApi('update_cabin_info', {
+        info_id: info.id,
+        info: {
           category: info.category,
           title: info.title,
           content: info.content,
           icon: info.icon
-        })
-        .eq('id', info.id);
-
-      if (error) throw error;
+        }
+      });
 
       await fetchCabinInfo();
       setEditingInfo(null);
