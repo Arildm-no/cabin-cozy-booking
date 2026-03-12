@@ -193,12 +193,7 @@ const Admin = () => {
 
   const handleDeleteApprovedBooking = async (bookingId: string) => {
     try {
-      const { error } = await supabase
-        .from('bookings')
-        .delete()
-        .eq('id', bookingId);
-
-      if (error) throw error;
+      await adminApi('delete_booking', { booking_id: bookingId });
 
       setApprovedBookings(prev => prev.filter(booking => booking.id !== bookingId));
       
