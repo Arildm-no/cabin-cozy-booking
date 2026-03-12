@@ -385,30 +385,10 @@ const Admin = () => {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .insert([{
-          username: newUser.username,
-          password_hash: newUser.password
-        }]);
-
-      if (error) {
-        console.error('Supabase error:', error);
-        if (error.code === '23505') {
-          toast({
-            title: "Error",
-            description: "Username already exists",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Error",
-            description: `Failed to create user: ${error.message}`,
-            variant: "destructive",
-          });
-        }
-        return;
-      }
+      await adminApi('create_user', {
+        new_username: newUser.username,
+        new_password: newUser.password
+      });
 
       await fetchUsers();
       setIsCreatingNewUser(false);
@@ -418,11 +398,11 @@ const Admin = () => {
         title: "Success",
         description: "User created successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating user:', error);
       toast({
         title: "Error",
-        description: "Failed to create user",
+        description: error.message?.includes('duplicate') ? "Username already exists" : "Failed to create user",
         variant: "destructive",
       });
     }
