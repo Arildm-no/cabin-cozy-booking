@@ -410,12 +410,7 @@ const Admin = () => {
 
   const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase
-        .from('users')
-        .update({ is_active: !currentStatus })
-        .eq('id', userId);
-
-      if (error) throw error;
+      await adminApi('toggle_user_status', { user_id: userId, new_status: !currentStatus });
 
       await fetchUsers();
       
