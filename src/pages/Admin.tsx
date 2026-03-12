@@ -439,12 +439,10 @@ const Admin = () => {
     }
 
     try {
-      const { data, error } = await supabase.rpc('update_user_password', {
-        username_input: resetPasswordUser,
+      await adminApi('reset_password', {
+        target_username: resetPasswordUser,
         new_password: newPassword
       });
-
-      if (error) throw error;
 
       setResetPasswordUser(null);
       setNewPassword('');
@@ -465,12 +463,7 @@ const Admin = () => {
 
   const handleDeleteUser = async (userId: string) => {
     try {
-      const { error } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', userId);
-
-      if (error) throw error;
+      await adminApi('delete_user', { user_id: userId });
 
       await fetchUsers();
       
